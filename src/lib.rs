@@ -1,4 +1,4 @@
-//! ActionRunner-tools: Compile-time modular `ToolAdapter` trait registry for typed CI/CD tools.
+//! mu-ci-tools: Compile-time modular `ToolAdapter` trait registry for typed CI/CD tools.
 
 pub mod adapter;
 pub mod adapters;
