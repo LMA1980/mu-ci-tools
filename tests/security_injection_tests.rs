@@ -1,4 +1,4 @@
-//! Comprehensive security injection and adapter validation test suite for ActionRunner-tools.
+//! Comprehensive security injection and adapter validation test suite for mu-ci-tools.
 //!
 //! Validates:
 //! - Shell metacharacter detection and prevention (command chaining, expansions, redirections).
@@ -8,7 +8,7 @@
 
 use std::ffi::OsString;
 
-use action_runner_tools::{
+use mu_ci_tools::{
     is_prohibited_shell_wrapper, validate_invocation_base, validate_path_within_working_dir,
     validate_safe_arg, validate_safe_relative_path, CargoAuditAdapter, CargoBenchAdapter,
     CargoBuildAdapter, CargoClippyAdapter, CargoFmtAdapter, CargoLlvmCovAdapter, CargoMiriAdapter,
@@ -589,8 +589,7 @@ fn test_cargo_publish_adapter() {
     assert_eq!(adapter.name(), "cargo-publish");
 
     // Default without --registry: auto-injects --registry muregist
-    let inv_default =
-        ToolInvocation::new("cargo-publish", ["-p", "action-runner-tools", "--dry-run"]);
+    let inv_default = ToolInvocation::new("cargo-publish", ["-p", "mu-ci-tools", "--dry-run"]);
     assert!(adapter.validate(&inv_default).is_ok());
     let argv = adapter.build_argv(&inv_default).expect("build argv");
     assert_eq!(
@@ -601,7 +600,7 @@ fn test_cargo_publish_adapter() {
             OsString::from("--registry"),
             OsString::from("muregist"),
             OsString::from("-p"),
-            OsString::from("action-runner-tools"),
+            OsString::from("mu-ci-tools"),
             OsString::from("--dry-run"),
         ]
     );
@@ -609,7 +608,7 @@ fn test_cargo_publish_adapter() {
     // Explicit --registry muregist
     let inv_reg = ToolInvocation::new(
         "cargo-publish",
-        ["--registry", "muregist", "-p", "action-runner-tools"],
+        ["--registry", "muregist", "-p", "mu-ci-tools"],
     );
     assert!(adapter.validate(&inv_reg).is_ok());
     let argv_reg = adapter.build_argv(&inv_reg).expect("build argv");
@@ -621,14 +620,14 @@ fn test_cargo_publish_adapter() {
             OsString::from("--registry"),
             OsString::from("muregist"),
             OsString::from("-p"),
-            OsString::from("action-runner-tools"),
+            OsString::from("mu-ci-tools"),
         ]
     );
 
     // Rejection of public registry (only internal muregist allowed)
     let inv_bad_reg = ToolInvocation::new(
         "cargo-publish",
-        ["--registry", "crates-io", "-p", "action-runner-tools"],
+        ["--registry", "crates-io", "-p", "mu-ci-tools"],
     );
     assert_eq!(
         adapter.validate(&inv_bad_reg),

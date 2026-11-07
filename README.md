@@ -1,23 +1,23 @@
-# ActionRunner-tools
+# mu-ci-tools
 
 <p align="center">
   <a href="https://hook.lma1980.duckdns.org/jobs">
-    <img src="https://hook.lma1980.duckdns.org/cards/LMA1980/ActionRunner-tools/card.svg" alt="ActionRunner-tools Factory Scorecard" width="520"/>
+    <img src="https://hook.lma1980.duckdns.org/cards/LMA1980/mu-ci-tools/card.svg" alt="mu-ci-tools Factory Scorecard" width="520"/>
   </a>
 </p>
 
 <p align="center">
-  <a href="https://hook.lma1980.duckdns.org/jobs"><img src="https://hook.lma1980.duckdns.org/badges/LMA1980/ActionRunner-tools/status.svg" alt="CI Status"/></a>
-  <a href="https://hook.lma1980.duckdns.org/jobs"><img src="https://hook.lma1980.duckdns.org/badges/LMA1980/ActionRunner-tools/score.svg" alt="Quality Score"/></a>
-  <a href="https://hook.lma1980.duckdns.org/jobs"><img src="https://hook.lma1980.duckdns.org/badges/LMA1980/ActionRunner-tools/coverage.svg" alt="Coverage"/></a>
-  <a href="https://hook.lma1980.duckdns.org/jobs"><img src="https://hook.lma1980.duckdns.org/badges/LMA1980/ActionRunner-tools/benchmark.svg" alt="Benchmark"/></a>
+  <a href="https://hook.lma1980.duckdns.org/jobs"><img src="https://hook.lma1980.duckdns.org/badges/LMA1980/mu-ci-tools/status.svg" alt="CI Status"/></a>
+  <a href="https://hook.lma1980.duckdns.org/jobs"><img src="https://hook.lma1980.duckdns.org/badges/LMA1980/mu-ci-tools/score.svg" alt="Quality Score"/></a>
+  <a href="https://hook.lma1980.duckdns.org/jobs"><img src="https://hook.lma1980.duckdns.org/badges/LMA1980/mu-ci-tools/coverage.svg" alt="Coverage"/></a>
+  <a href="https://hook.lma1980.duckdns.org/jobs"><img src="https://hook.lma1980.duckdns.org/badges/LMA1980/mu-ci-tools/benchmark.svg" alt="Benchmark"/></a>
 </p>
 
 ---
 
 Compile-time modular Rust `ToolAdapter` trait registry for typed CI/CD tools across the **ActionRunner** ecosystem.
 
-`ActionRunner-tools` enforces structured, deterministic execution across `ActionRunner-controller` (task planning, DAG scheduling, capability matching) and `ActionRunner-rs` (isolated sandboxed execution).
+`mu-ci-tools` enforces structured, deterministic execution across `ActionRunner-controller` (task planning, DAG scheduling, capability matching) and `ActionRunner-rs` (isolated sandboxed execution).
 
 ---
 
