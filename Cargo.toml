@@ -1,6 +1,6 @@
 [package]
 name = "mu-ci-tools"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Compile-time modular ToolAdapter trait registry for typed CI/CD tools in ActionRunner"
 license = "LGPL-3.0-only WITH LGPL-3.0-linking-exception"
