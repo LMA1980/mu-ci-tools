@@ -11,10 +11,10 @@ use std::ffi::OsString;
 use mu_ci_tools::{
     is_prohibited_shell_wrapper, validate_invocation_base, validate_path_within_working_dir,
     validate_safe_arg, validate_safe_relative_path, CargoAuditAdapter, CargoBenchAdapter,
-    CargoBuildAdapter, CargoClippyAdapter, CargoFmtAdapter, CargoLlvmCovAdapter, CargoMiriAdapter,
-    CargoPublishAdapter, CargoTestAdapter, MdformatAdapter, ParsedBenchmark, ParsedTestCase,
-    TestCaseStatus, ToolAdapter, ToolError, ToolInvocation, ToolRegistry, ToolValidationError,
-    TrunkAdapter,
+    CargoBuildAdapter, CargoClippyAdapter, CargoDeployAdapter, CargoFmtAdapter,
+    CargoLlvmCovAdapter, CargoMiriAdapter, CargoPublishAdapter, CargoTestAdapter, MdformatAdapter,
+    ParsedBenchmark, ParsedTestCase, TestCaseStatus, ToolAdapter, ToolError, ToolInvocation,
+    ToolParamValue, ToolRegistry, ToolValidationError, TrunkAdapter,
 };
 
 #[test]
@@ -854,6 +854,56 @@ fn test_mdformat_adapter() {
 }
 
 #[test]
+fn test_cargo_deploy_adapter_security_and_param_sanitization() {
+    let registry = ToolRegistry::with_builtin_adapters();
+    let adapter = registry
+        .get("cargo-deploy")
+        .expect("cargo-deploy must be registered");
+    assert!(!adapter.param_specs().is_empty());
+
+    // Shell metacharacters inside typed ToolParamValue::StringList must fail sanitization.
+    let bad_param_inv = ToolInvocation::new("cargo-deploy", Vec::<String>::new())
+        .with_param("packages", vec!["ok-crate", "bad;rm -rf /"]);
+    assert!(matches!(
+        adapter.validate(&bad_param_inv),
+        Err(ToolValidationError::ShellMetacharacterDetected { .. })
+    ));
+
+    // RUSTC_WRAPPER disguised in typed parameter key must be rejected.
+    let bad_wrapper_param = ToolInvocation::new("cargo-deploy", Vec::<String>::new())
+        .with_param("rustc_wrapper", "/tmp/evil");
+    assert!(matches!(
+        CargoDeployAdapter.validate(&bad_wrapper_param),
+        Err(ToolValidationError::ProhibitedShellWrapper(_))
+    ));
+
+    // Non-muregist registry names and crates.io URLs must fail closed.
+    let bad_registry = ToolInvocation::new("cargo-deploy", ["--registry", "crates-io"]);
+    assert!(adapter.validate(&bad_registry).is_err());
+
+    let bad_url = ToolInvocation::new("cargo-deploy", ["--registry-url", "https://crates.io"]);
+    assert!(adapter.validate(&bad_url).is_err());
+
+    // Absolute or traversing manifest paths must fail sanitization.
+    let traversal = ToolInvocation::new("cargo-deploy", ["--manifest-path", "../Cargo.toml"]);
+    assert!(matches!(
+        adapter.validate(&traversal),
+        Err(ToolValidationError::PathTraversalDetected(_))
+    ));
+
+    // Valid typed invocation dispatches cleanly through ToolRegistry.
+    let valid = ToolInvocation::new("cargo-deploy", ["--dry-run", "--locked"])
+        .with_param("registry", "muregist")
+        .with_param("registry_url", "https://registry.example.invalid:8444")
+        .with_param("packages", vec!["mu-ci-tools"])
+        .with_param("poll_timeout_secs", ToolParamValue::Integer(15));
+    let (argv, profile) = registry.validate_and_build(&valid).expect("valid dispatch");
+    assert_eq!(argv[0], "cargo");
+    assert_eq!(argv[1], "deploy");
+    assert!(profile.allow_network);
+}
+
+#[test]
 fn test_tool_registry_with_builtin_adapters_coverage() {
     let registry = ToolRegistry::with_builtin_adapters();
 
@@ -862,6 +912,7 @@ fn test_tool_registry_with_builtin_adapters_coverage() {
         "cargo-bench",
         "cargo-build",
         "cargo-clippy",
+        "cargo-deploy",
         "cargo-fmt",
         "cargo-llvm-cov",
         "cargo-miri",
@@ -873,10 +924,11 @@ fn test_tool_registry_with_builtin_adapters_coverage() {
 
     assert_eq!(registry.tool_names(), expected_tools);
 
-    // Dispatch test for each of the 11 tools
+    // Dispatch test for each of the 12 tools
     let test_invs = [
         ToolInvocation::new("cargo-fmt", ["--check"]),
         ToolInvocation::new("cargo-clippy", ["--workspace"]),
+        ToolInvocation::new("cargo-deploy", ["--dry-run"]),
         ToolInvocation::new("cargo-test", ["--workspace"]),
         ToolInvocation::new("cargo-bench", ["--workspace"]),
         ToolInvocation::new("cargo-audit", ["--deny", "warnings"]),

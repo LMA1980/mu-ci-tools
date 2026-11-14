@@ -7,13 +7,17 @@ pub mod registry;
 pub mod sanitize;
 
 pub use adapter::{
-    ParsedBenchmark, ParsedTestCase, SandboxProfileRequirement, TestCaseStatus, ToolAdapter,
-    ToolExecutionMetrics, ToolInvocation,
+    CdStagingRunReport, ConsumerCheckReport, LicenseTier, ParsedBenchmark, ParsedTestCase,
+    SandboxProfileRequirement, StagedCrateReport, TestCaseStatus, ToolAdapter,
+    ToolExecutionMetrics, ToolInvocation, ToolParamKind, ToolParamSpec, ToolParamValue,
 };
 pub use adapters::{
-    CargoAuditAdapter, CargoBenchAdapter, CargoBuildAdapter, CargoClippyAdapter, CargoFmtAdapter,
-    CargoLlvmCovAdapter, CargoMiriAdapter, CargoPublishAdapter, CargoTestAdapter, MdformatAdapter,
-    TrunkAdapter,
+    CargoAuditAdapter, CargoBenchAdapter, CargoBuildAdapter, CargoClippyAdapter,
+    CargoDeployAdapter, CargoDeployExecutionConfig, CargoDeployParams, CargoFmtAdapter,
+    CargoLlvmCovAdapter, CargoMiriAdapter, CargoPublishAdapter, CargoRunner, CargoTestAdapter,
+    DeployError, DeployRunFailure, HttpSparseIndexClient, LicensePolicyMode, MdformatAdapter,
+    PlannedPackage, PublishPlan, SparseIndexClient, SparseIndexResponse, SystemCargoRunner,
+    TrunkAdapter, WorkspaceMetadata,
 };
 pub use error::{MetricParseError, ToolBuildError, ToolError, ToolValidationError};
 pub use registry::ToolRegistry;
