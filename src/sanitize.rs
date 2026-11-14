@@ -2,7 +2,7 @@
 
 use std::path::{Component, Path};
 
-use crate::adapter::ToolInvocation;
+use crate::adapter::{ToolInvocation, ToolParamValue};
 use crate::error::ToolValidationError;
 
 /// Multi-character and single-character shell operators and expansion tokens.
@@ -296,6 +296,36 @@ pub fn validate_invocation_base(inv: &ToolInvocation) -> Result<(), ToolValidati
 
         if is_prohibited_shell_wrapper(value) {
             return Err(ToolValidationError::ProhibitedShellWrapper(value.clone()));
+        }
+    }
+
+    for (key, value) in &inv.params {
+        let trimmed_key = key.trim();
+        if trimmed_key.is_empty() {
+            return Err(ToolValidationError::InvalidArgValue {
+                tool: inv.tool_name.clone(),
+                flag: "params".to_string(),
+                value: key.clone(),
+                reason: "parameter name must not be empty".to_string(),
+            });
+        }
+
+        validate_safe_arg(key)?;
+        let normalized_upper = trimmed_key.to_ascii_uppercase().replace('-', "_");
+        if PROHIBITED_ENV_KEYS.contains(&normalized_upper.as_str())
+            || normalized_upper.contains("RUSTC_WRAPPER")
+        {
+            return Err(ToolValidationError::ProhibitedShellWrapper(key.clone()));
+        }
+
+        match value {
+            ToolParamValue::String(s) => validate_safe_arg(s)?,
+            ToolParamValue::Bool(_) | ToolParamValue::Integer(_) => {}
+            ToolParamValue::StringList(items) => {
+                for item in items {
+                    validate_safe_arg(item)?;
+                }
+            }
         }
     }
 
